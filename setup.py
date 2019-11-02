@@ -1,23 +1,21 @@
-from setuptools import setup, find_packages
+import setuptools
 
-setup(
-    name='itermocil',
+setuptools.setup(
+    name='initerm2',
     version='0.2.2',
-    url='https://github.com/TomAnthony/itermocil',
+    url='https://github.com/ken0x0a/itermocil',
     license='MIT',
-    description='Create pre-defined window/pane layouts and run commands in iTerm',
+    description=
+    'Create pre-defined window/pane layouts and run commands in iTerm',
     author='Tom Anthony',
     author_email='',
-    packages=find_packages(),
-    py_modules=['itermocil'],
+    packages=setuptools.find_packages(),
+    py_modules=['initerm2'],
     package_data={},
     classifiers=[],
-    entry_points={
-        'console_scripts': [
-            'itermocil = itermocil:main',
-        ]
-    },
+    entry_points={'console_scripts': [
+        'itermocil = itermocil:main',
+    ]},
     install_requires=[
         'PyYAML',
-    ]
-)
+    ])
