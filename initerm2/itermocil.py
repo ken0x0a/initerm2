@@ -5,9 +5,12 @@ import os
 import re
 import subprocess
 import sys
+from typing import List, Union
 import yaml
 
 from math import ceil
+
+from argparse import ArgumentParser
 
 __version__ = '0.2.2'
 
@@ -36,9 +39,9 @@ class Itermocil:
             if len(bits) > 2 and '-nightly' in str(major_version):
                 build = bits[2].replace('-nightly', '')
                 if (int(build) < 20150805):
-                    print "This is an unsupported beta build of iTerm."
-                    print "Try the latest nightly, or the 2.1.1 stable build."
-                    print "See Readme notes for more info. Sorry!"
+                    print("This is an unsupported beta build of iTerm.")
+                    print("Try the latest nightly, or the 2.1.1 stable build.")
+                    print(("See Readme notes for more info. Sorry!"))
                     sys.exit(1)
 
         # Initiate from arguments
@@ -48,10 +51,10 @@ class Itermocil:
 
         # Open up the file and parse it with PyYaml
         with open(self.file, 'r') as f:
-            self.parsed_config = yaml.load(f)
+            self.parsed_config = yaml.load(f, Loader=yaml.FullLoader)
 
         # This will be where we build up the script.
-        self.applescript = []
+        self.applescript: List[str] = []
         self.applescript.append('tell application "iTerm"')
         self.applescript.append('activate')
 
@@ -80,7 +83,7 @@ class Itermocil:
         # Finish the script
         self.applescript.append('end tell')
 
-    def get_version_string(self):
+    def get_version_string(self) -> str:
         """ Get version of iTerm. 'iTerm2' (iTerm 2.9+) has much improved
             Applescript support and options, so is more robust.
         """
@@ -89,10 +92,10 @@ class Itermocil:
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE)
 
-        version_script = 'set iterm_version to (get version of application "iTerm")'
+        version_script = b'set iterm_version to (get version of application "iTerm")'
         v = osa.communicate(version_script)[0]
 
-        return v.strip()
+        return str(v.strip())
 
     def get_major_version(self):
         """ Get version of iTerm. 'iTerm2' (iTerm 2.9+) has much improved
@@ -134,7 +137,7 @@ class Itermocil:
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE)
 
-        return osa.communicate(parsed_script)[0]
+        return osa.communicate(bytes(parsed_script, 'utf-8'))[0]
 
     def script(self):
         """ Return the Applescript we have built (so far). Mainly for
@@ -242,7 +245,7 @@ class Itermocil:
                 cp = pp + 2
                 self.applescript.append(create_pane(pp, cp, "horizontal"))
 
-            for p in range(0, second_columns):
+            for p in range(0, int(second_columns)):
                 pp = (p * 2) + 1
                 cp = pp + 1
                 self.applescript.append(create_pane(pp, cp, "vertical"))
@@ -537,7 +540,7 @@ class Itermocil:
                 total_pane_count -= 1
 
         if 'windows' not in self.parsed_config:
-            print "ERROR: No windows defined in " + self.file
+            print("ERROR: No windows defined in " + self.file)
             sys.exit(1)
 
         for num, window in enumerate(self.parsed_config['windows']):
@@ -574,7 +577,7 @@ class Itermocil:
                             'cd {path}'.format(path=parsed_path))
                     pass
             else:
-                print 'no root!'
+                print('no root!')
 
             # Generate Applescript to lay the panes out and then add to our
             # Applescript commands to run.
@@ -637,8 +640,7 @@ class Itermocil:
                 self.initiate_window(commands)
 
 
-def main():
-
+def getParser() -> ArgumentParser:
     parser = argparse.ArgumentParser(
         description=
         'Process a teamocil file natively in iTerm2 (i.e. without tmux).',
@@ -647,7 +649,10 @@ def main():
     parser.add_argument("layout_name",
                         help="the layout name you wish to process",
                         metavar="layout",
-                        nargs="*")
+                        default=".initerm2",
+                        nargs="*"
+                        # nargs="?"
+                        )
 
     # teamocil compatible flags:
 
@@ -669,7 +674,8 @@ def main():
 
     parser.add_argument(
         "--layout",
-        help="specify a layout file rather looking in the ~/.teamocil",
+        "-l",
+        help="specify a layout file rather looking in the ~/.initerm2",
         action="store_true",
         default=None)
 
@@ -689,29 +695,34 @@ def main():
         action="store_true",
         default=None)
 
+    return parser
+
+
+def main():
+    parser = getParser()
+
     args = parser.parse_args()
 
     # itermocil files live in a hidden directory in the home directory
-    # either in an .itermocil directory or a .teamocil directory
+    # either in an .itermocil directory directory
     itermocil_dir = os.path.join(os.path.expanduser("~"), ".itermocil")
-    teamocil_dir = os.path.join(os.path.expanduser("~"), ".teamocil")
 
     # If --version then show the version number
     if args.version:
-        print __version__
+        print(__version__)
         sys.exit(0)
 
-    # If --list then show the layout names in ~./teamocil
+    # If --list then show the layout names in ...
     if args.list:
-        for d in [itermocil_dir, teamocil_dir]:
+        for d in [itermocil_dir]:
             if os.path.isdir(d):
-                print d
+                print(d)
                 for file in os.listdir(d):
                     if file.endswith(".yml"):
                         print("  " + file[:-4])
         sys.exit(0)
 
-    filepath = None
+    filepath: Union[str, None] = None
     if not args.layout_name:
         # parser.error('You must supply a layout name, or just the --list option. Use -h for help.')
         filepath = os.path.join(os.getcwd(), 'iTermocil.yml')
@@ -723,23 +734,21 @@ def main():
     else:
         layout = args.layout_name[0]
         # Sanitize input
-        layout = re.sub("[\*\?\[\]\'\"\\\$\;\&\(\)\|\^\<\>]", "", layout)
+        layout = re.sub(r"[\*\?\[\]\'\"\\\$\;\&\(\)\|\^\<\>]", "", layout)
 
     # Build teamocil file path based on presence of --layout flag.
     if args.layout:
         filepath = os.path.join(os.getcwd(), layout)
     else:
-        if not filepath:
+        defaultPath = os.path.join(os.getcwd(), '.initerm2')
+        if os.path.isfile(defaultPath):
+            filepath = defaultPath
+        elif not filepath:
             if not os.path.isdir(itermocil_dir):
-                if not os.path.isdir(teamocil_dir):
-                    print "ERROR: No ~/.itermocil or ~/.teamocil directory"
-                    sys.exit(1)
+                print("ERROR: No ~/.itermocil")
+                sys.exit(1)
 
             filepath = os.path.join(itermocil_dir, layout + ".yml")
-            filepath_teamocil = os.path.join(teamocil_dir, layout + ".yml")
-            if not os.path.isfile(filepath) and os.path.isfile(
-                    filepath_teamocil):
-                filepath = filepath_teamocil
 
     # If --edit the try to launch editor and exit
     if args.edit:
@@ -758,13 +767,13 @@ def main():
 
     # Check teamocil file exists
     if not os.path.isfile(filepath):
-        print "ERROR: There is no file at: " + filepath
+        print("ERROR: There is no file at: " + filepath)
         sys.exit(1)
 
     # If --show then output and exit()
     if args.show:
         with open(filepath, 'r') as fin:
-            print fin.read()
+            print(fin.read())
             sys.exit(0)
 
     # Parse the teamocil file and execute it.
@@ -776,7 +785,7 @@ def main():
     if args.debug:
 
         script = instance.script()
-        script = re.sub("^(\s*)", "", script, flags=re.MULTILINE)
+        script = re.sub(r"^(\s*)", "", script, flags=re.MULTILINE)
 
         indent = ""
         formatted_script = []
@@ -793,7 +802,7 @@ def main():
                 indent += "\t"
 
         formatted_script.append("")
-        print "\n".join(formatted_script)
+        print("\n".join(formatted_script))
     else:
         instance.execute()
 
