@@ -14,7 +14,7 @@ setuptools.setup(
     package_data={},
     classifiers=[],
     entry_points={'console_scripts': [
-        'itermocil = itermocil:main',
+        'initerm2 = initerm2.itermocil:main',
     ]},
     install_requires=[
         'PyYAML',

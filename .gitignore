@@ -3,3 +3,4 @@
 archive
 yaml
 alfi
+*.egg-info
