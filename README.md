@@ -1,10 +1,19 @@
 ## Introduction
 
-iTermocil allows you to setup pre-configured layouts of windows and panes in [iTerm2](https://iterm2.com/), having each open in a specified directory and execute specified commands. You do this by writing YAML files to save your layouts. If your using session restoration or saved window layouts in iTerm, you should find iTermocil is a nice upgrade on that.
+This is one of the forks of https://github.com/TomAnthony/itermocil
 
-iTermocil supports iTerm 2.x and the new 3.x (including later betas). It works better with the new 3.x versions which have improved Applescript support.
+**NOTE:** YOU NEED PYTHON VERSION >= 3.6, as this using `typing` module.
 
 ![Example](https://raw.githubusercontent.com/TomAnthony/itermocil/master/itermocil.gif)
+
+## Install
+
+```sh
+pip install https://github.com/ken0x0a/initerm2.git
+# create a file ".initerm2" at working directory, and run
+initerm2
+```
+
 
 ## Installing iTermocil
 
@@ -43,50 +52,50 @@ iTermocil is compatible with all of teamocil's flags, and they all work in the s
 
 ### Global options
 
-| Option      | Description
-|-------------|----------------------------
-| `--list`    | Lists all available layouts in `~/.itermocil`
+| Option   | Description                                   |
+| -------- | --------------------------------------------- |
+| `--list` | Lists all available layouts in `~/.itermocil` |
 
 ### Layout options
 
-| Option      | Description
-|-------------|----------------------------
-| `--layout`  | Takes a custom file path to a YAML layout file instead of `[layout-name]`
-| `--here`    | Uses the current window as the layout’s first window
-| `--edit`    | Edit the layout file in either `$EDITOR` or your preferred GUI editor
-| `--show`    | Shows the layout content instead of executing it
+| Option     | Description                                                               |
+| ---------- | ------------------------------------------------------------------------- |
+| `--layout` | Takes a custom file path to a YAML layout file instead of `[layout-name]` |
+| `--here`   | Uses the current window as the layout’s first window                      |
+| `--edit`   | Edit the layout file in either `$EDITOR` or your preferred GUI editor     |
+| `--show`   | Shows the layout content instead of executing it                          |
 
 ## Configuration
 
 ### Session
 
-| Key       | Description
-|-----------|----------------------------
-| `name`    | This is currently ignored in iTermocil as there is no tmux session.
-| `windows` | An `Array` of windows
-| `pre`     | Command that get executes before all other actions.
+| Key       | Description                                                         |
+| --------- | ------------------------------------------------------------------- |
+| `name`    | This is currently ignored in iTermocil as there is no tmux session. |
+| `windows` | An `Array` of windows                                               |
+| `pre`     | Command that get executes before all other actions.                 |
 
 ### Windows
 
-| Key        | Description
-|------------|----------------------------
-| `name`     | All iTerm panes in this window will be given this name.
-| `root`     | The path where all panes in the window will be started
-| `layout`   | The layout format that iTermocil will use (see below)
-| `panes`    | An `Array` of panes
-| `command`  | A command to run in the current window. Ignored if `panes` is present
-| `commands` | An array of commands for run in the current window. Ignored if either `panes` or `command `is present
-| `focus`    | This is currently unsupported in iTermocil
+| Key        | Description                                                                                           |
+| ---------- | ----------------------------------------------------------------------------------------------------- |
+| `name`     | All iTerm panes in this window will be given this name.                                               |
+| `root`     | The path where all panes in the window will be started                                                |
+| `layout`   | The layout format that iTermocil will use (see below)                                                 |
+| `panes`    | An `Array` of panes                                                                                   |
+| `command`  | A command to run in the current window. Ignored if `panes` is present                                 |
+| `commands` | An array of commands for run in the current window. Ignored if either `panes` or `command `is present |
+| `focus`    | This is currently unsupported in iTermocil                                                            |
 
 
 ### Panes
 
 A pane can either be a `String` or a `Hash`. If it’s a `String`, Teamocil will treat it as a single-command pane.
 
-| Key        | Description
-|------------|----------------------------
-| `commands` | An `Array` of commands that will be ran when the pane is created
-| `focus`    | If set to `true`, the pane will be selected after the layout has been executed
+| Key        | Description                                                                    |
+| ---------- | ------------------------------------------------------------------------------ |
+| `commands` | An `Array` of commands that will be ran when the pane is created               |
+| `focus`    | If set to `true`, the pane will be selected after the layout has been executed |
 
 ## Examples
 
@@ -197,12 +206,12 @@ windows:
 | (0)              | (1)              |
 |                  |                  |
 |                  |                  |
-|                  |                  |
-|------------------|------------------|
-| (2)              | (3)              |
-|                  |                  |
-|                  |                  |
-|                  |                  |
+|     |     |
+| --- | --- |
+| (2) | (3) |
+|     |     |
+|     |     |
+|     |     |
 '------------------'------------------'
 ```
 
