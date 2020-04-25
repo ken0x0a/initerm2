@@ -9,7 +9,7 @@ This is one of the forks of https://github.com/TomAnthony/itermocil
 ## Install
 
 ```sh
-pip install https://github.com/ken0x0a/initerm2.git
+pip install git+git://github.com/ken0x0a/initerm2.git
 # create a file ".initerm2" at working directory, and run
 initerm2
 ```
